@@ -8,7 +8,6 @@
 
 #define block_size  1024
 #define max_file_name 1024
-#define max_block      4194304 //4M clusters
 
 struct Filesystem;
 
@@ -21,20 +20,23 @@ typedef struct
 
 typedef struct
 {
-    char *current_path;
+    unsigned long size; //in superblock
+    bool *block_state;  //in superblock
+
+    unsigned long blocks_count;
     char *name;
-    int size;
-    bool *block_state;
-    char current_block[block_size];
+    char *current_path;
+    char current_block[block_size]; //block buffer
     FILE* desc;
 }Filesystem;
 
 bool update_super_block(Filesystem *fs, unsigned int block_number, bool value);
-bool create_filesystem(Filesystem *fs, const char *disk_name);
+bool create_filesystem(Filesystem *fs, const char *disk_name, unsigned long disk_size);
 void close_filesystem(Filesystem *fs);
 bool read_block(Filesystem *fs, long disk_address, char *buff);
 bool allocate_block(Filesystem *fs, long disk_address, char *data_block);
 bool update_super_block(Filesystem *fs, unsigned int block_number, bool value);
+bool open_filesystem(Filesystem *fs, const char *filename);
 
 
 #endif //FILESYSTEM
