@@ -21,12 +21,12 @@ typedef struct
 typedef struct
 {
     unsigned long size; //in superblock
-    bool *block_state;  //in superblock
+    //bool *block_state;  //in superblock
 
     unsigned long blocks_count;
     char *name;
     char *current_path;
-    char current_block[block_size]; //block buffer (potrzebne to?)
+    char current_block[block_size]; //block buffer
     FILE* desc;
 }Filesystem;
 

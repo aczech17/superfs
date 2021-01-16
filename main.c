@@ -16,7 +16,6 @@ int main()
         return 2137;
     }
     printf("%d\n", fs.size);
-    printf("%d\n", fs.block_state[0]);
 
     char new_block[block_size];
     memset(new_block, 255, block_size);

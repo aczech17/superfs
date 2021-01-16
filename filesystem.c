@@ -12,7 +12,7 @@ bool create_filesystem(Filesystem *fs, const char *disk_name, unsigned long disk
     //allocate memory
     fs->name = malloc(max_file_name + 1);
     fs->current_path = malloc(max_file_name + 1);
-    fs->block_state = malloc(fs->blocks_count);
+    //fs->block_state = malloc(fs->blocks_count);
     //****
 
     unsigned name_length = strlen(disk_name);
@@ -80,7 +80,7 @@ bool open_filesystem(Filesystem *fs, const char *filename)
     //allocate memory
     fs->name = malloc(max_file_name + 1);
     fs->current_path = malloc(max_file_name + 1);
-    fs->block_state = malloc(fs->blocks_count);
+    //fs->block_state = malloc(fs->blocks_count);
     //****
 
     memcpy(fs->name, filename, strlen(filename) + 1);
@@ -91,7 +91,7 @@ bool open_filesystem(Filesystem *fs, const char *filename)
     {
         char buff;
         fread(&buff, 1, 1, fs->desc);
-        fs->block_state[i] = (bool)buff;
+        //fs->block_state[i] = (bool)buff;
     }
 
     fs->current_path[0] = '/';
@@ -104,7 +104,7 @@ bool open_filesystem(Filesystem *fs, const char *filename)
 void close_filesystem(Filesystem *fs)
 {
     free(fs->current_path);
-    free(fs->block_state);
+    //free(fs->block_state);
 
     if(fs->desc)
         fclose(fs->desc);
@@ -120,7 +120,7 @@ bool read_block(Filesystem *fs, long disk_address, char *buff)
 
     fs->desc = fopen(fs->name, "rb");
 
-    fseek(fs->desc, sizeof(fs->size) + fs->blocks_count + disk_address, SEEK_SET); //after superblock
+    fseek(fs->desc, (long)(sizeof(fs->size) + fs->blocks_count + disk_address), SEEK_SET); //after superblock
     fread(buff, block_size, 1, fs->desc);
 
     fclose(fs->desc);
@@ -145,19 +145,19 @@ bool allocate_block(Filesystem *fs, long disk_address, char *data_block)
     }
 
 
-    fseek(fs->desc, sizeof(fs->size) + fs->blocks_count + disk_address, SEEK_SET);
+    fseek(fs->desc, (long)(sizeof(fs->size) + fs->blocks_count + disk_address), SEEK_SET);
     fwrite(data_block, 1, block_size, fs->desc);
 
     unsigned int block_number = disk_address / block_size;
     //is the block free?
     bool is_free;
-    fseek(fs->desc, sizeof(fs->size) + block_number, SEEK_SET);
+    fseek(fs->desc, (long)(sizeof(fs->size) + block_number), SEEK_SET);
     fread(&is_free, 1, 1, fs->desc);
     if(!is_free)
         return 0;
 
-    fs->block_state[block_number] = 1; //potrzebne to???
-    update_super_block(fs, block_number, 1);
+    //fs->block_state[block_number] = 1; //potrzebne to???
+    update_super_block(fs, (long)block_number, 1);
 
     fclose(fs->desc);
     return 1;
@@ -174,7 +174,7 @@ bool update_super_block(Filesystem *fs, long block_number, bool value)
     if(desc == NULL)
         return 0;
 
-    fseek(desc, sizeof(fs->size) + block_number, SEEK_SET);
+    fseek(desc, (long)(sizeof(fs->size) + block_number), SEEK_SET);
     fwrite(&value, 1, 1, desc);
 
     fclose(fs->desc);
