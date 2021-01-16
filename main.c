@@ -5,6 +5,7 @@
 
 int main()
 {
+    bool success;
     const char *disk_name = "newdisk";
     Disk dsk;
     bool disk_exists = open_disk(&dsk, disk_name);
@@ -20,27 +21,29 @@ int main()
 
     char new_block[block_size];
     memset(new_block, 255, block_size);
-    long disk_address = 10 * block_size;
+    long disk_address = 0;
 
-    bool alloc_success = allocate_block(&dsk, disk_address, new_block);
-    if(alloc_success)
-        puts("Allocation successful");
-    else
-        puts("Allocation error");
-
-
-    bool delete_success = delete_block(&dsk, disk_address);
-    if(delete_success)
+    success = delete_block(&dsk, disk_address);
+    if(success)
         puts("Deleted");
     else
         puts("Error delete");
 
-    alloc_success = allocate_block(&dsk, disk_address, new_block);
-    if(alloc_success)
+
+    success = allocate_block(&dsk, disk_address, new_block);
+    if(success)
         puts("Allocation successful");
     else
         puts("Allocation error");
 
+    success = allocate_block(&dsk, disk_address, new_block);
+    if(success)
+        puts("Allocation successful");
+    else
+        puts("Allocation error");
+
+
+    printf("%lu\n", sizeof(dsk.size) + sizeof(dsk.taken_bytes) + dsk.blocks_count);
     close_disk(&dsk);
     return 0;
 }

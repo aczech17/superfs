@@ -12,11 +12,10 @@
 typedef struct
 {
     unsigned long size; //in superblock
-    //bool *block_state;  //in superblock
+    unsigned long taken_bytes;
 
     unsigned long blocks_count;
     char *name;
-    char *current_path;
     char current_block[block_size]; //block buffer
     FILE* desc;
 }Disk;
