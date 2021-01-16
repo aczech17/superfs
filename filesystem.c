@@ -60,6 +60,8 @@ bool create_filesystem(Filesystem *fs, const char *disk_name, unsigned long disk
 
     fs->current_path[0] = '/';
     fs->current_path[1] = 0;
+
+    fclose(fs->desc);
     return 1;
 }
 
@@ -81,7 +83,7 @@ bool open_filesystem(Filesystem *fs, const char *filename)
     fs->block_state = malloc(fs->blocks_count);
     //****
 
-    memcpy(&fs->name, filename, strlen(filename) + 1);
+    memcpy(fs->name, filename, strlen(filename) + 1);
 
     //getting blocks state from superblock
     unsigned long i;
@@ -94,6 +96,8 @@ bool open_filesystem(Filesystem *fs, const char *filename)
 
     fs->current_path[0] = '/';
     fs->current_path[1] = 0;
+
+    fclose(fs->desc);
     return 1;
 }
 
@@ -101,7 +105,9 @@ void close_filesystem(Filesystem *fs)
 {
     free(fs->current_path);
     free(fs->block_state);
-    fclose(fs->desc);
+
+    if(fs->desc)
+        fclose(fs->desc);
 }
 
 bool read_block(Filesystem *fs, long disk_address, char *buff)
@@ -111,8 +117,13 @@ bool read_block(Filesystem *fs, long disk_address, char *buff)
         perror("Bad address align at reading");
         return 0;
     }
-    fseek(fs->desc, fs->blocks_count + disk_address, SEEK_SET); //after superblock
+
+    fs->desc = fopen(fs->name, "rb");
+
+    fseek(fs->desc, sizeof(fs->size) + fs->blocks_count + disk_address, SEEK_SET); //after superblock
     fread(buff, block_size, 1, fs->desc);
+
+    fclose(fs->desc);
     return 1;
 }
 
@@ -125,31 +136,52 @@ bool allocate_block(Filesystem *fs, long disk_address, char *data_block)
     }
 
 
-    fseek(fs->desc, fs->blocks_count + disk_address, SEEK_SET);
-    fwrite(data_block, block_size, 1, fs->desc);
+
+    fs->desc = fopen(fs->name, "r+b");
+    if(fs->desc == NULL)
+    {
+        perror("Could not allocate block");
+        return 0;
+    }
+
+
+    fseek(fs->desc, sizeof(fs->size) + fs->blocks_count + disk_address, SEEK_SET);
+    fwrite(data_block, 1, block_size, fs->desc);
 
     unsigned int block_number = disk_address / block_size;
-    fs->block_state[block_number] = 1;
+    //is the block free?
+    bool is_free;
+    fseek(fs->desc, sizeof(fs->size) + block_number, SEEK_SET);
+    fread(&is_free, 1, 1, fs->desc);
+    if(!is_free)
+        return 0;
+
+    fs->block_state[block_number] = 1; //potrzebne to???
     update_super_block(fs, block_number, 1);
 
-    fs->size += block_size;
-
+    fclose(fs->desc);
     return 1;
 }
 
-bool update_super_block(Filesystem *fs, unsigned int block_number, bool value)
+bool update_super_block(Filesystem *fs, long block_number, bool value)
 {
     if(block_number > fs->blocks_count)
     {
         perror("wrong block number");
         return 0;
     }
-    FILE *desc = fopen(fs->name, "wb");
+    FILE *desc = fopen(fs->name, "r+b");
     if(desc == NULL)
         return 0;
 
-    fseek(desc, (long int)block_number, SEEK_SET);
+    fseek(desc, sizeof(fs->size) + block_number, SEEK_SET);
     fwrite(&value, 1, 1, desc);
 
+    fclose(fs->desc);
     return 1;
+}
+
+bool delete_block(Filesystem *fs, long block_number)
+{
+    return update_super_block(fs, block_number, 0);
 }

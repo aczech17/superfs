@@ -26,16 +26,15 @@ typedef struct
     unsigned long blocks_count;
     char *name;
     char *current_path;
-    char current_block[block_size]; //block buffer
+    char current_block[block_size]; //block buffer (potrzebne to?)
     FILE* desc;
 }Filesystem;
 
-bool update_super_block(Filesystem *fs, unsigned int block_number, bool value);
 bool create_filesystem(Filesystem *fs, const char *disk_name, unsigned long disk_size);
 void close_filesystem(Filesystem *fs);
 bool read_block(Filesystem *fs, long disk_address, char *buff);
 bool allocate_block(Filesystem *fs, long disk_address, char *data_block);
-bool update_super_block(Filesystem *fs, unsigned int block_number, bool value);
+bool update_super_block(Filesystem *fs, long block_number, bool value);
 bool open_filesystem(Filesystem *fs, const char *filename);
 
 

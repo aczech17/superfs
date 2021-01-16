@@ -18,6 +18,11 @@ int main()
     printf("%d\n", fs.size);
     printf("%d\n", fs.block_state[0]);
 
+    char new_block[block_size];
+    memset(new_block, 255, block_size);
+    bool udalosiealokowackurwa = allocate_block(&fs, 0, new_block);
+    printf("%d\n", udalosiealokowackurwa);
+
 
     close_filesystem(&fs);
     return 0;
