@@ -12,7 +12,6 @@ bool create_filesystem(Filesystem *fs, const char *disk_name, unsigned long disk
     //allocate memory
     fs->name = malloc(max_file_name + 1);
     fs->current_path = malloc(max_file_name + 1);
-    //fs->block_state = malloc(fs->blocks_count);
     //****
 
     unsigned name_length = strlen(disk_name);
@@ -135,8 +134,6 @@ bool allocate_block(Filesystem *fs, long disk_address, char *data_block)
         return 0;
     }
 
-
-
     fs->desc = fopen(fs->name, "r+b");
     if(fs->desc == NULL)
     {
@@ -150,16 +147,14 @@ bool allocate_block(Filesystem *fs, long disk_address, char *data_block)
 
     unsigned int block_number = disk_address / block_size;
     //is the block free?
-    bool is_free;
+    bool is_allocated;
     fseek(fs->desc, (long)(sizeof(fs->size) + block_number), SEEK_SET);
-    fread(&is_free, 1, 1, fs->desc);
-    if(!is_free)
+    fread(&is_allocated, 1, 1, fs->desc);
+    fclose(fs->desc);
+    if(is_allocated)
         return 0;
 
-    //fs->block_state[block_number] = 1; //potrzebne to???
     update_super_block(fs, (long)block_number, 1);
-
-    fclose(fs->desc);
     return 1;
 }
 
@@ -181,7 +176,12 @@ bool update_super_block(Filesystem *fs, long block_number, bool value)
     return 1;
 }
 
-bool delete_block(Filesystem *fs, long block_number)
+bool delete_block(Filesystem *fs, long disk_address)
 {
+    if(disk_address % block_size != 0)
+    {
+        return 0;
+    }
+    long block_number = disk_address / block_size;
     return update_super_block(fs, block_number, 0);
 }

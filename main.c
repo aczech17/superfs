@@ -5,23 +5,41 @@
 
 int main()
 {
+    const char *disk_name = "newdisk";
     Filesystem fs;
-    //bool result = create_filesystem(&fs, "newdisk", GIGA);
-    //printf("%d\n", result);
-
-    bool result = open_filesystem(&fs, "newdisk");
-    if(result == 0)
+    bool disk_exists = open_filesystem(&fs, disk_name);
+    if(disk_exists == 0)
     {
-        perror("Gowno");
-        return 2137;
+        bool create_success = create_filesystem(&fs, disk_name, GIGA);
+        if(!create_success)
+        {
+            perror("Could not create disk");
+            return 1;
+        }
     }
-    printf("%d\n", fs.size);
 
     char new_block[block_size];
     memset(new_block, 255, block_size);
-    bool udalosiealokowackurwa = allocate_block(&fs, 0, new_block);
-    printf("%d\n", udalosiealokowackurwa);
+    long disk_address = 10 * block_size;
 
+    bool alloc_success = allocate_block(&fs, disk_address, new_block);
+    if(alloc_success)
+        puts("Allocation successful");
+    else
+        puts("Allocation error");
+
+
+    bool delete_success = delete_block(&fs, disk_address);
+    if(delete_success)
+        puts("Deleted");
+    else
+        puts("Error delete");
+
+    alloc_success = allocate_block(&fs, disk_address, new_block);
+    if(alloc_success)
+        puts("Allocation successful");
+    else
+        puts("Allocation error");
 
     close_filesystem(&fs);
     return 0;

@@ -36,6 +36,6 @@ bool read_block(Filesystem *fs, long disk_address, char *buff);
 bool allocate_block(Filesystem *fs, long disk_address, char *data_block);
 bool update_super_block(Filesystem *fs, long block_number, bool value);
 bool open_filesystem(Filesystem *fs, const char *filename);
-
+bool delete_block(Filesystem *fs, long block_number);
 
 #endif //FILESYSTEM
