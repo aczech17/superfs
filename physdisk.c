@@ -225,3 +225,35 @@ bool is_free(Disk *dsk, long block_number)
     fclose(dsk->desc);
     return result;
 }
+
+long find_blocks(Disk *dsk, long blocks_wanted)
+{
+    if(blocks_wanted > dsk->blocks_count)
+        return -1;
+
+    dsk->desc = fopen(dsk->name, "rb");
+    long potential_address = 0;
+    fseek(dsk->desc, (long)(sizeof(dsk->size) + sizeof(dsk->taken_bytes)), SEEK_SET);
+    byte *block_info = malloc(dsk->blocks_count);
+    fread(block_info, 1, dsk->blocks_count, dsk->desc);
+
+    long i;
+    for(i = 0; i < dsk->blocks_count - blocks_wanted; i++)
+    {
+        if(block_info[i] == 0)
+        {
+            potential_address = i;
+            long j;
+            for(j = potential_address; j < potential_address + blocks_wanted; j++)
+            {
+                if(j == dsk->blocks_count) //end of the array
+                    break;
+                if(block_info[j] == 1) //allocated
+                    break;
+            }
+            if(j == potential_address + blocks_wanted) //we did it
+                return potential_address;
+        }//if
+    }
+    return -1; //could not find
+}

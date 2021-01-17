@@ -31,6 +31,6 @@ bool allocate_block(Disk *dsk, long disk_address, byte *data_block);
 bool update_super_block(Disk *dsk, long block_number, bool value);
 bool delete_block(Disk *dsk, long block_number);
 bool is_free(Disk *dsk, long block_number);
-bool find_blocks(Disk *dsk, long blocks_count);
+long find_blocks(Disk *dsk, long blocks_wanted);
 
 #endif //PHYSDISK
