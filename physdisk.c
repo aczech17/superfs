@@ -83,13 +83,13 @@ bool open_disk(Disk *dsk, const char *filename)
 
     memcpy(dsk->name, filename, strlen(filename) + 1);
 
-
     fclose(dsk->desc);
     return 1;
 }
 
 void close_disk(Disk *dsk)
 {
+    free(dsk->name);
     if(dsk->desc)
         fclose(dsk->desc);
 }
@@ -139,7 +139,7 @@ bool allocate_block(Disk *dsk, long disk_address, char *data_block)
     fread(&is_allocated, 1, 1, dsk->desc);
     if(is_allocated)
     {
-        close_disk(dsk);
+        fclose(dsk->desc);
         return 0;
     }
 
@@ -211,9 +211,17 @@ bool delete_block(Disk *dsk, long disk_address)
     long block_number = disk_address / block_size;
     bool update_success = update_super_block(dsk, block_number, 0);
     if(!update_success)
-    {
-        //perror("Could not delete block");
         return 0;
-    }
     return 1;
+}
+
+bool is_free(Disk *dsk, long block_number)
+{
+    dsk->desc = fopen(dsk->name, "rb");
+    fseek(dsk->desc, (long)(sizeof(dsk->size) + sizeof(dsk->taken_bytes) + block_number), SEEK_SET);
+    bool result;
+    fread(&result, 1, 1, dsk->desc);
+
+    fclose(dsk->desc);
+    return result;
 }
