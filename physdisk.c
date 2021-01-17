@@ -252,8 +252,14 @@ long find_blocks(Disk *dsk, long blocks_wanted)
                     break;
             }
             if(j == potential_address + blocks_wanted) //we did it
+            {
+                fclose(dsk->desc);
+                free(block_info);
                 return potential_address;
+            }
         }//if
     }
+    fclose(dsk->desc);
+    free(block_info);
     return -1; //could not find
 }
