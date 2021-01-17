@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+
+typedef uint8_t byte;
 
 #define block_size  1024
 #define max_file_name 1024
@@ -16,17 +19,18 @@ typedef struct
 
     unsigned long blocks_count;
     char *name;
-    char current_block[block_size]; //block buffer
+    byte current_block[block_size]; //block buffer
     FILE* desc;
 }Disk;
 
 bool create_disk(Disk *dsk, const char *disk_name, unsigned long disk_size);
 bool open_disk(Disk *dsk, const char *filename);
 void close_disk(Disk *dsk);
-bool read_block(Disk *dsk, long disk_address, char *buff);
-bool allocate_block(Disk *dsk, long disk_address, char *data_block);
+bool read_block(Disk *dsk, long disk_address, byte *buff);
+bool allocate_block(Disk *dsk, long disk_address, byte *data_block);
 bool update_super_block(Disk *dsk, long block_number, bool value);
 bool delete_block(Disk *dsk, long block_number);
 bool is_free(Disk *dsk, long block_number);
+bool find_blocks(Disk *dsk, long blocks_count);
 
 #endif //PHYSDISK

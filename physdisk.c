@@ -47,14 +47,14 @@ bool create_disk(Disk *dsk, const char *disk_name, unsigned long disk_size)
     unsigned long i;
     for(i = 0; i < dsk->blocks_count; i++)
     {
-        char zero_byte = 0;
+        byte zero_byte = 0;
         fwrite(&zero_byte, 1, 1, dsk->desc); //writing block state - whole disk is empty
     }
    //********************
 
     for(i = 0; i < disk_size ; i++)
     {
-        char zero_byte = 0;
+        byte zero_byte = 0;
         fwrite(&zero_byte, 1, 1, dsk->desc); //writing empty data to disk
     }
 
@@ -94,7 +94,7 @@ void close_disk(Disk *dsk)
         fclose(dsk->desc);
 }
 
-bool read_block(Disk *dsk, long disk_address, char *buff)
+bool read_block(Disk *dsk, long disk_address, byte *buff)
 {
     if(disk_address % block_size != 0) //bad align
     {
@@ -112,7 +112,7 @@ bool read_block(Disk *dsk, long disk_address, char *buff)
     return 1;
 }
 
-bool allocate_block(Disk *dsk, long disk_address, char *data_block)
+bool allocate_block(Disk *dsk, long disk_address, byte *data_block)
 {
     if(disk_address % block_size != 0) // bad align
     {
