@@ -21,29 +21,14 @@ int main()
 
     char new_block[block_size];
     memset(new_block, 255, block_size);
-    long disk_address = 0;
 
-    success = delete_block(&dsk, disk_address);
-    if(success)
-        puts("Deleted");
-    else
-        puts("Error delete");
+    allocate_block(&dsk, 0, new_block);
+    allocate_block(&dsk, 1024, new_block);
+    allocate_block(&dsk, 5 * 1024, new_block);
 
 
-    success = allocate_block(&dsk, disk_address, new_block);
-    if(success)
-        puts("Allocation successful");
-    else
-        puts("Allocation error");
+    map_disk(&dsk);
 
-    success = allocate_block(&dsk, disk_address, new_block);
-    if(success)
-        puts("Allocation successful");
-    else
-        puts("Allocation error");
-
-
-    printf("%lu\n", sizeof(dsk.size) + sizeof(dsk.taken_bytes) + dsk.blocks_count);
     close_disk(&dsk);
     return 0;
 }

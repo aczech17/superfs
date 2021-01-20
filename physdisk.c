@@ -278,12 +278,13 @@ void map_disk(Disk *dsk)
     long i;
     for(i = 0; i < dsk->blocks_count; i++)
     {
-        if(block_info[i] != current_state)
+        if(block_info[i] != current_state || i == dsk->blocks_count - 1)
         {
-            long size = (i - current_block) * block_size;
-            printf("Address: %lu ", current_block * block_size);
-            printf("Size: %lu ", (i - current_block) * block_size);
-            printf("State: %c\n", current_state);
+            long address = current_block * block_size;
+            long space_size = (i - current_block) * block_size;
+            printf("Address: %lu ", address);
+            printf("Size: %lu ", space_size);
+            printf("State: %s\n", current_state == 1 ? "taken" : "free");
 
             current_block = i;
             current_state = block_info[i];
