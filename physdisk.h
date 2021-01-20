@@ -2,15 +2,15 @@
 #define PHYSDISK
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
+
+#define block_size      1024
+#define max_file_name   1024
 
 typedef uint8_t byte;
-
-#define block_size  1024
-#define max_file_name 1024
 
 typedef struct
 {
@@ -32,5 +32,6 @@ bool update_super_block(Disk *dsk, long block_number, bool value);
 bool delete_block(Disk *dsk, long block_number);
 bool is_free(Disk *dsk, long block_number);
 long find_blocks(Disk *dsk, long blocks_wanted);
+void map_disk(Disk *dsk);
 
 #endif //PHYSDISK

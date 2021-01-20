@@ -232,11 +232,11 @@ long find_blocks(Disk *dsk, long blocks_wanted)
         return -1;
 
     dsk->desc = fopen(dsk->name, "rb");
-    long potential_address = 0;
     fseek(dsk->desc, (long)(sizeof(dsk->size) + sizeof(dsk->taken_bytes)), SEEK_SET);
     byte *block_info = malloc(dsk->blocks_count);
     fread(block_info, 1, dsk->blocks_count, dsk->desc);
 
+    long potential_address = 0;
     long i;
     for(i = 0; i < dsk->blocks_count - blocks_wanted; i++)
     {
@@ -246,10 +246,11 @@ long find_blocks(Disk *dsk, long blocks_wanted)
             long j;
             for(j = potential_address; j < potential_address + blocks_wanted; j++)
             {
-                if(j == dsk->blocks_count) //end of the array
+                if(j == dsk->blocks_count || block_info[j] == 1) // j is allocated or end of array
+                {
+                    i = j + 1;
                     break;
-                if(block_info[j] == 1) //allocated
-                    break;
+                }
             }
             if(j == potential_address + blocks_wanted) //we did it
             {
@@ -262,4 +263,30 @@ long find_blocks(Disk *dsk, long blocks_wanted)
     fclose(dsk->desc);
     free(block_info);
     return -1; //could not find
+}
+
+void map_disk(Disk *dsk)
+{
+    byte *block_info = malloc(dsk->blocks_count);
+
+    dsk->desc = fopen(dsk->name, "rb");
+    fseek(dsk->desc, (long)(sizeof(dsk->size) + sizeof(dsk->taken_bytes)), SEEK_SET);
+    fread(block_info, 1, dsk->blocks_count, dsk->desc);
+
+    long current_block = 0;
+    bool current_state = block_info[0];
+    long i;
+    for(i = 0; i < dsk->blocks_count; i++)
+    {
+        if(block_info[i] != current_state)
+        {
+            long size = (i - current_block) * block_size;
+            printf("Address: %lu ", current_block * block_size);
+            printf("Size: %lu ", (i - current_block) * block_size);
+            printf("State: %c\n", current_state);
+
+            current_block = i;
+            current_state = block_info[i];
+        }
+    }
 }
