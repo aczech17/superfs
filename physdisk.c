@@ -289,4 +289,6 @@ void map_disk(Disk *dsk)
             current_state = block_info[i];
         }
     }
+    free(block_info);
+    fclose(dsk->desc);
 }
