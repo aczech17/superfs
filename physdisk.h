@@ -19,7 +19,6 @@ typedef struct
 
     unsigned long blocks_count;
     char *name;
-    byte current_block[block_size]; //block buffer
     FILE* desc;
 }Disk;
 
