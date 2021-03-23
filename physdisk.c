@@ -209,10 +209,7 @@ bool delete_block(Disk *dsk, long disk_address)
         return 0;
     }
     long block_number = disk_address / block_size;
-    bool update_success = update_super_block(dsk, block_number, 0);
-    if(!update_success)
-        return 0;
-    return 1;
+    return update_super_block(dsk, block_number, 0);
 }
 
 bool is_free(Disk *dsk, long block_number)
